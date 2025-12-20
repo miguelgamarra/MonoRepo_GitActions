@@ -1,0 +1,43 @@
+name: Run a SonarQube Scan and a SonarQube Quality Gate check
+
+on:
+  workflow_call:
+    secrets:
+      sonar_token:
+        required: true
+
+jobs:
+  run-sonarqube:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Install payments-api node packages
+        run: npm ci
+        working-directory: ./src/payments-api
+
+      - name: Run payments-api tests with coverage
+        run: npm run test:cov
+        working-directory: ./src/payments-api
+
+      - name: Install payments-web node packages
+        run: npm ci
+        working-directory: ./src/payments-web
+
+      - name: Run payments-web tests with coverage
+        run: npm run test:cov
+        working-directory: ./src/payments-web
+
+      - name: Run SonarQube scan
+        uses: sonarsource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.sonar_token }}
+
+      - name: Run SonarQube Quality Gate check
+        uses: sonarsource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # v1.2.0
+        with:
+          pollingTimeoutSec: 600
+        env:
+          SONAR_TOKEN: ${{ secrets.sonar_token }}
