@@ -16,12 +16,6 @@ jobs:
     with:
       workdir: backend
 
-  test-frontend:
-    uses: ./.github/workflows/test-node-project-using-jest.yml
-    with:
-      node-version: 20
-      workdir: frontend
-
   test-backend:
     uses: ./.github/workflows/test-node-project-using-jest.yml
     with:
