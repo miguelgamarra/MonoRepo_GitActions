@@ -7,23 +7,23 @@ on:
 
 jobs:
   lint-frontend:
-    uses: ./.github/workflows/lint-node-project-using-eslint.yml
+    uses: ./.github/workflows/reusable/lint-node-project-using-eslint.yml
     with:
       workdir: frontend
 
   lint-backend:
-    uses: ./.github/workflows/lint-node-project-using-eslint.yml
+    uses: ./.github/workflows/reusable/lint-node-project-using-eslint.yml
     with:
       workdir: backend
 
   test-frontend:
-    uses: ./.github/workflows/test-node-project-using-jest.yml
+    uses: ./.github/workflows/reusable/test-node-project-using-jest.yml
     with:
       node-version: 20
       workdir: frontend
 
   test-backend:
-    uses: ./.github/workflows/test-node-project-using-jest.yml
+    uses: ./.github/workflows/reusable/test-node-project-using-jest.yml
     with:
       node-version: 20
       workdir: backend
