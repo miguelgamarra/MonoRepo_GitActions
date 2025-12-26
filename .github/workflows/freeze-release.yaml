@@ -1,0 +1,35 @@
+name: Freeze release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  freeze_release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+
+      - id: get-node-project-properties
+        uses: ./.github/actions/get-node-project-properties
+        with:
+          package-json-filepath: ./package.json
+
+      - name: Check if the tag exist
+        run: |
+          # Fetch tags
+          git fetch --tags --force
+          # Check
+          if git rev-parse --verify --quiet "release-${{ steps.get-node-project-properties.outputs.version }}" >/dev/null; then
+            echo "The Tag release-${{ steps.get-node-project-properties.outputs.version }} already exists."
+            exit 1
+          fi
+
+      - name: Create tag
+        run: git tag -a release-${{ steps.get-node-project-properties.outputs.version }}
+
+      - name: Push tag
+        run: git push origin release-${{ steps.get-node-project-properties.outputs.version }}
