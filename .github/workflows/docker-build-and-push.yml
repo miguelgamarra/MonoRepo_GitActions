@@ -3,6 +3,9 @@ name: Docker Build and Push
 on:
   workflow_call:
     inputs:
+      image_name:
+        required: true
+        type: string
       tag:
         required: true
         type: string
@@ -21,6 +24,7 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,10 +35,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: ${{ inputs.workdir }}
-          file: ${{ inputs.dockerfile_path }}
+          file: ${{ inputs.workdir }}/${{ inputs.dockerfile_path }}
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/monorepo-proyecto:${{ inputs.tag }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.image_name }}:${{ inputs.tag }}

@@ -1,0 +1,31 @@
+name: Build Docker Images
+
+on:
+  push:
+    tags:
+      - "release-*"
+
+jobs:
+  build-payments-api:
+    name: Build Payments API Image
+    uses: ./.github/workflows/docker-build-and-push.yml
+    with:
+      image_name: payments-api
+      tag: ${{ github.ref_name }}
+      workdir: src/payments-api
+      dockerfile_path: Dockerfile
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  build-payments-web:
+    name: Build Payments Web Image
+    uses: ./.github/workflows/docker-build-and-push.yml
+    with:
+      image_name: payments-web
+      tag: ${{ github.ref_name }}
+      workdir: src/payments-web
+      dockerfile_path: Dockerfile
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
