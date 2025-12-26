@@ -1,0 +1,20 @@
+name: Read properties of a node project
+description: Get the properties of a node project reading its package.json file
+
+inputs:
+  package-json-filepath:
+    description: Path of the package.json file.
+    required: false
+    default: ./package.json
+
+outputs:
+  name:
+    description: name found in the package.json
+  version:
+    description: version found in the package.json
+  author:
+    description: author found in the package.json
+
+runs:
+  using: node24
+  main: dist/index.js
