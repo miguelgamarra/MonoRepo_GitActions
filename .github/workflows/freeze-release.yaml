@@ -18,6 +18,11 @@ jobs:
         with:
           package-json-filepath: ./package.json
 
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
       - name: Check if the tag exist
         run: |
           # Fetch tags
@@ -29,7 +34,7 @@ jobs:
           fi
 
       - name: Create tag
-        run: git tag -a release-${{ steps.read-project-metadata-composite-action.outputs.version }}
+        run: git tag -a release-${{ steps.read-project-metadata-composite-action.outputs.version }} -m "Release ${{ steps.read-project-metadata-composite-action.outputs.version }}"
 
       - name: Push tag
         run: git push origin release-${{ steps.read-project-metadata-composite-action.outputs.version }}
