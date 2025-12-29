@@ -1,7 +1,9 @@
-name: Update README with Last Workflow Runs
+name: Update README with Workflow Runs
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -14,38 +16,65 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Ensure jq is installed
-        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-      - name: Get last 5 workflow runs from GitHub API
+      - name: Fetch workflow runs and update README
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
-          curl -s \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=5 \
-            > runs.json
+          python << 'EOF'
+          import requests
+          from datetime import datetime
 
-      - name: Generate markdown table
-        run: |
-          echo "## Last 5 Workflow Runs" > runs.md
-          echo "" >> runs.md
-          echo "| Workflow | Status | Conclusion | Created At | Link |" >> runs.md
-          echo "|----------|--------|------------|------------|------|" >> runs.md
+          headers = {
+              "Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
+              "Accept": "application/vnd.github+json"
+          }
 
-          jq -r '.workflow_runs[] |
-          "| \(.name) | \(.status) | \(.conclusion // "N/A") | \(.created_at) | [Link](\(.html_url)) |"' runs.json >> runs.md
+          repo = os.environ["REPO"]
+          url = f"https://api.github.com/repos/{repo}/actions/runs?per_page=5"
 
-      - name: Update README.md
-        run: |
-          sed -i '/## Last 5 Workflow Runs/,$d' README.md || true
-          cat runs.md >> README.md
+          response = requests.get(url, headers=headers)
+          response.raise_for_status()
+
+          runs = response.json()["workflow_runs"]
+
+          table = [
+              "## Last 5 Workflow Runs",
+              "",
+              "| Workflow | Status | Conclusion | Created At | Link |",
+              "|----------|--------|------------|------------|------|"
+          ]
+
+          for run in runs:
+              created = datetime.fromisoformat(run["created_at"].replace("Z", ""))
+              table.append(
+                  f"| {run['name']} | {run['status']} | {run['conclusion']} | "
+                  f"{created.strftime('%Y-%m-%d %H:%M:%S')} | "
+                  f"[Link]({run['html_url']}) |"
+              )
+
+          with open("README.md", "r") as f:
+              content = f.read()
+
+          marker = "## Last 5 Workflow Runs"
+          if marker in content:
+              content = content.split(marker)[0].rstrip()
+
+          content += "\n\n" + "\n".join(table) + "\n"
+
+          with open("README.md", "w") as f:
+              f.write(content)
+          EOF
 
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m "docs: update last workflow runs status" || echo "No changes"
+          git commit -m "docs: update workflow runs table" || echo "No changes"
           git push
