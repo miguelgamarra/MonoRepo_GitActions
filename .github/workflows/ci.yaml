@@ -33,5 +33,8 @@ jobs:
 
   sonarqube-analysis:
     uses: ./.github/workflows/sonarqube-analysis.yaml
+    with:
+      sonarqube_organization: ${{ vars.SONARQUBE_ORGANIZATION }}
+      sonarqube_projectkey: ${{ vars.SONARQUBE_PROJECTKEY }}
     secrets:
       sonar_token: ${{ secrets.SONAR_TOKEN }}
