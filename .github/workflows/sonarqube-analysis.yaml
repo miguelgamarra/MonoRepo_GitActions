@@ -2,6 +2,13 @@ name: Run a SonarQube Scan and a SonarQube Quality Gate check
 
 on:
   workflow_call:
+    inputs:
+      sonarqube_organization:
+        required: true
+        type: string
+      sonarqube_projectkey:
+        required: true
+        type: string
     secrets:
       sonar_token:
         required: true
@@ -35,8 +42,15 @@ jobs:
 
       - name: Run SonarQube scan
         uses: sonarsource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
+        with:
+          args: >
+            "-Dsonar.organization=${{ inputs.sonarqube_organization }}"
+            "-Dsonar.projectKey=${{ inputs.sonarqube_projectkey }}"
 
       - name: Run SonarQube Quality Gate check
         uses: sonarsource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # v1.2.0
         with:
           pollingTimeoutSec: 600
+          args: >
+            "-Dsonar.organization=${{ inputs.sonarqube_organization }}"
+            "-Dsonar.projectKey=${{ inputs.sonarqube_projectkey }}"
