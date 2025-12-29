@@ -9,6 +9,28 @@ on:
       - main
 
 jobs:
+  lint-backend:
+    uses: ./.github/workflows/lint-node-project-using-eslint.yml
+    with:
+      workdir: ./src/payments-api
+
+  test-backend:
+    uses: ./.github/workflows/test-node-project-using-jest.yml
+    with:
+      node-version: 20
+      workdir: ./src/payments-api
+
+  lint-frontend:
+    uses: ./.github/workflows/lint-node-project-using-eslint.yml
+    with:
+      workdir: ./src/payments-web
+
+  test-frontend:
+    uses: ./.github/workflows/test-node-project-using-jest.yml
+    with:
+      node-version: 20
+      workdir: ./src/payments-web
+
   sonarqube-analysis:
     uses: ./.github/workflows/sonarqube-analysis.yaml
     secrets:
