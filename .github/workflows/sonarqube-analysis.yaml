@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       sonar_host_url:
-        required: true
+        required: false
         type: string
         default: https://sonarcloud.io
       sonarqube_organization:
