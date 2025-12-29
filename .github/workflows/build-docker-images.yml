@@ -29,3 +29,27 @@ jobs:
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  publish-artifact:
+    name: Publish release artifact
+    runs-on: ubuntu-latest
+    needs:
+      - build-payments-api
+      - build-payments-web
+
+    steps:
+      - name: Create release metadata artifact
+        run: |
+          cat <<EOF > artifact.json
+          {
+            "api": "${{ github.ref_name }}",
+            "web": "${{ github.ref_name }}",
+            "run_id": "${{ github.run_id }}"
+          }
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-metadata
+          path: artifact.json
